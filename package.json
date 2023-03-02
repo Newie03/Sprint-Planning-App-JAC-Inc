@@ -1,0 +1,19 @@
+{
+  "name": "sprint-planning-app-jac-inc",
+  "version": "1.0.0",
+  "description": "INFO3112 Sprint Planning App (Project 1)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Newie03/Sprint-Planning-App-JAC-Inc.git"
+  },
+  "author": "JAC Inc. (Connor Mcphail, Jeesung Shin, Aaron Newham)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Newie03/Sprint-Planning-App-JAC-Inc/issues"
+  },
+  "homepage": "https://github.com/Newie03/Sprint-Planning-App-JAC-Inc#readme"
+}

@@ -2,13 +2,14 @@ import React from "react";
 
 const TaskList = ({ title, tasks, onEdit, onRemove }) => (
   <div className="task-list">
-    <h2>{title}</h2>
+    <h3>{title}</h3>
     <ul>
       {tasks.map((task) => (
-        <li key={task.description} className="task-list__item">
-          <div className="task-list__itemtask-list__item-status">
-            Status: {task.status}
-          </div>
+        <li
+          key={`${task.sprint}-${task.description}`}
+          className="task-list__item"
+        >
+          <div className="task-list__item-status">Status: {task.status}</div>
           <div className="task-list__item-description">
             Description: {task.description}
           </div>

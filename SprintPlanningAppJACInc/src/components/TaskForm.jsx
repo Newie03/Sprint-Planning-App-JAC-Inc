@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 
-const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
+const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
+  const [sprint, setSprint] = useState(
+    editingTask ? editingTask.sprint : sprints[0].name
+  );
   const [status, setStatus] = useState(
-    editingTask ? editingTask.status : "Backlog"
+    editingTask ? editingTask.status : "Todo"
   );
   const [description, setDescription] = useState(
     editingTask ? editingTask.description : ""
@@ -17,24 +20,34 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
 
   useEffect(() => {
     if (editingTask) {
+      setSprint(editingTask.sprint);
       setStatus(editingTask.status);
       setDescription(editingTask.description);
       setTeamMember(editingTask.teamMember);
       setCost(editingTask.cost);
       setEstimate(editingTask.estimate);
     } else {
-      setStatus("Backlog");
+      setSprint(sprints[0].name);
+      setStatus("Todo");
       setDescription("");
       setTeamMember("");
       setCost(0);
       setEstimate(0);
     }
-  }, [editingTask]);
+  }, [editingTask, sprints]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ status, description, teamMember, cost, estimate });
-    setStatus("Backlog");
+    onSubmit({
+      sprint,
+      status,
+      description,
+      teamMember,
+      cost,
+      estimate,
+    });
+    setSprint(sprints[0].name);
+    setStatus("Todo");
     setDescription("");
     setTeamMember("");
     setCost(0);
@@ -44,13 +57,25 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
   return (
     <form onSubmit={handleSubmit} className="task-form">
       <div className="task-form__field">
+        <label>Sprint:</label>
+        <select value={sprint} onChange={(e) => setSprint(e.target.value)}>
+          {sprints.map((sprint) => (
+            <option key={sprint.name} value={sprint.name}>
+              {sprint.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="task-form__field">
         <label>Status:</label>
         <select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="Backlog">Backlog</option>
-          <option value="Todo">Todo</option>
-          <option value="InProgress">InProgress</option>
-          <option value="UnderReview">UnderReview</option>
-          <option value="Done">Done</option>
+          {sprints
+            .find((s) => s.name === sprint)
+            .columns.map((column) => (
+              <option key={`${sprint}-${column}`} value={column}>
+                {column}
+              </option>
+            ))}
         </select>
       </div>
       <div className="task-form__field">

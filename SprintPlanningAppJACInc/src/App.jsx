@@ -1,34 +1,105 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import React, { useState } from "react";
+import TaskForm from "./components/TaskForm";
+import TaskList from "./components/TaskList";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const [tasks, setTasks] = useState({
+    Backlog: [],
+    Todo: [],
+    InProgress: [],
+    UnderReview: [],
+    Done: [],
+  });
+  const [editingTask, setEditingTask] = useState(null);
+
+  const handleTaskSubmit = (task) => {
+    if (editingTask) {
+      setTasks((prevTasks) => {
+        const newTasks = { ...prevTasks };
+        const taskList = newTasks[editingTask.status];
+        const index = taskList.findIndex(
+          (t) => t.description === editingTask.description
+        );
+        if (index !== -1) {
+          taskList[index] = task;
+          if (task.status !== editingTask.status) {
+            newTasks[editingTask.status] = taskList.filter(
+              (t) => t.description !== editingTask.description
+            );
+            newTasks[task.status] = [...newTasks[task.status], task];
+          }
+        }
+        setEditingTask(null);
+        return newTasks;
+      });
+    } else {
+      setTasks((prevTasks) => ({
+        ...prevTasks,
+        [task.status]: [...prevTasks[task.status], task],
+      }));
+    }
+  };
+
+  const handleEdit = (task) => {
+    setEditingTask(task);
+  };
+
+  const handleRemove = (task) => {
+    setTasks((prevTasks) => {
+      const newTasks = { ...prevTasks };
+      const taskList = newTasks[task.status];
+      const index = taskList.findIndex(
+        (t) => t.description === task.description
+      );
+      if (index !== -1) {
+        taskList.splice(index, 1);
+      }
+      return newTasks;
+    });
+  };
 
   return (
-    <div className="App">
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src="/vite.svg" className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://reactjs.org" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div>
+      <h1>Task Tracker</h1>
+      <TaskForm
+        onSubmit={handleTaskSubmit}
+        editingTask={editingTask}
+        onCancel={() => setEditingTask(null)}
+      />
+      <div className="task-lists">
+        <TaskList
+          title="Backlog"
+          tasks={tasks.Backlog}
+          onEdit={handleEdit}
+          onRemove={handleRemove}
+        />
+        <TaskList
+          title="Todo"
+          tasks={tasks.Todo}
+          onEdit={handleEdit}
+          onRemove={handleRemove}
+        />
+        <TaskList
+          title="In Progress"
+          tasks={tasks.InProgress}
+          onEdit={handleEdit}
+          onRemove={handleRemove}
+        />
+        <TaskList
+          title="Under Review"
+          tasks={tasks.UnderReview}
+          onEdit={handleEdit}
+          onRemove={handleRemove}
+        />
+        <TaskList
+          title="Done"
+          tasks={tasks.Done}
+          onEdit={handleEdit}
+          onRemove={handleRemove}
+        />
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

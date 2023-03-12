@@ -40,3 +40,69 @@
 .read-the-docs {
   color: #888;
 }
+
+/* TaskForm */
+
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+}
+
+.task-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.task-form__field label {
+  font-weight: bold;
+}
+
+.task-form__actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* TaskList */
+
+.task-list {
+  margin: 1rem 0;
+}
+
+.task-list h2 {
+  margin: 0;
+}
+
+.task-list__item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 0.5rem rgba(0, 0, 0, 0.2);
+}
+
+.task-list__item-status {
+  font-weight: bold;
+}
+
+.task-list__item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+/* App */
+
+.app {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1rem;
+}

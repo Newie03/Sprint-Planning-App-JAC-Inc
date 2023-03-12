@@ -42,8 +42,8 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
+    <form onSubmit={handleSubmit} className="task-form">
+      <div className="task-form__field">
         <label>Status:</label>
         <select value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="Backlog">Backlog</option>
@@ -53,7 +53,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
           <option value="Done">Done</option>
         </select>
       </div>
-      <div>
+      <div className="task-form__field">
         <label>Description:</label>
         <input
           type="text"
@@ -61,7 +61,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
-      <div>
+      <div className="task-form__field">
         <label>Team Member:</label>
         <input
           type="text"
@@ -69,7 +69,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
           onChange={(e) => setTeamMember(e.target.value)}
         />
       </div>
-      <div>
+      <div className="task-form__field">
         <label>Relative Cost:</label>
         <input
           type="number"
@@ -77,7 +77,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
           onChange={(e) => setCost(parseInt(e.target.value))}
         />
       </div>
-      <div>
+      <div className="task-form__field">
         <label>Relative Estimate:</label>
         <input
           type="number"
@@ -85,14 +85,16 @@ const TaskForm = ({ onSubmit, editingTask, onCancel }) => {
           onChange={(e) => setEstimate(parseInt(e.target.value))}
         />
       </div>
-      <button type="submit">
-        {editingTask ? "Update Task" : "Create Task"}
-      </button>
-      {editingTask && (
-        <button type="button" onClick={onCancel}>
-          Cancel
+      <div className="task-form__actions">
+        <button type="submit">
+          {editingTask ? "Update Task" : "Create Task"}
         </button>
-      )}
+        {editingTask && (
+          <button type="button" onClick={onCancel}>
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 };

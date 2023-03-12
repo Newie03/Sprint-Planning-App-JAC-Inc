@@ -1,22 +1,31 @@
 import React from "react";
 
 const TaskList = ({ title, tasks, onEdit, onRemove }) => (
-  <div>
+  <div className="task-list">
     <h2>{title}</h2>
     <ul>
       {tasks.map((task) => (
-        <li key={task.description}>
-          <div>Status: {task.status}</div>
-          <div>Description: {task.description}</div>
-          <div>Team Member: {task.teamMember}</div>
-          <div>Relative Cost: {task.cost}</div>
-          <div>Relative Estimate: {task.estimate}</div>
-          <button onClick={() => onEdit(task)}>Edit</button>
-          <button onClick={() => onRemove(task)}>Remove</button>
+        <li key={task.description} className="task-list__item">
+          <div className="task-list__itemtask-list__item-status">
+            Status: {task.status}
+          </div>
+          <div className="task-list__item-description">
+            Description: {task.description}
+          </div>
+          <div className="task-list__item-team-member">
+            Team Member: {task.teamMember}
+          </div>
+          <div className="task-list__item-cost">Relative Cost: {task.cost}</div>
+          <div className="task-list__item-estimate">
+            Relative Estimate: {task.estimate}
+          </div>
+          <div className="task-list__item-actions">
+            <button onClick={() => onEdit(task)}>Edit</button>
+            <button onClick={() => onRemove(task)}>Remove</button>
+          </div>
         </li>
       ))}
-    </ul>
+    </ul>{" "}
   </div>
 );
-
 export default TaskList;

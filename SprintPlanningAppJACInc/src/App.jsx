@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
+import "./App.css";
 
 const App = () => {
   const [tasks, setTasks] = useState({
@@ -59,7 +60,7 @@ const App = () => {
   };
 
   return (
-    <div>
+    <div className="app">
       <h1>Task Tracker</h1>
       <TaskForm
         onSubmit={handleTaskSubmit}

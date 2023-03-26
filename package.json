@@ -16,8 +16,10 @@
     "url": "https://github.com/Newie03/Sprint-Planning-App-JAC-Inc/issues"
   },
   "homepage": "https://github.com/Newie03/Sprint-Planning-App-JAC-Inc#readme",
+  "type": "module",
   "dependencies": {
     "@fastify/cors": "^8.2.0",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "fastify": "^4.13.0",
     "got": "^12.5.3",

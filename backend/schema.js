@@ -4,6 +4,7 @@ const schema = `
     },
 
     type Task {
+        sprint : String
         status: String
         description: String
         member: String
@@ -12,7 +13,8 @@ const schema = `
     },
 
     type Mutation {
-        addTask(status: String, description: String, member: String, cost: Int, estimate: Int): Task
+        addTask(sprint: String, status: String, description: String, member: String, cost: Int, estimate: Int): Task,
+        updateTask(sprint: String, status: String, description: String, member: String, cost: Int, estimate: Int): Task
     }
 
 `

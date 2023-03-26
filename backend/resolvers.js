@@ -7,8 +7,14 @@ const resolvers = {
     },
     addTask: async args => {
         let db = await dbRtns.getDBInstance();
-        let task = {status: args.status, description: args.description, member: args.member, cost: args.cost, estimate: args.estimate};
+        let task = {sprint: args.sprint, status: args.status, description: args.description, member: args.member, cost: args.cost, estimate: args.estimate};
         let results = await dbRtns.addOne(db, "tasks", task);
+        return results.acknowledged ? task : null;
+    },
+    updateTask: async args => {
+        let db = await dbRtns.getDBInstance();
+        let task = {sprint: args.sprint, status: args.status, description: args.description, member: args.member, cost: args.cost, estimate: args.estimate};
+        let results = await dbRtns.updateOne(db, "tasks", {description: task.description}, task);
         return results.acknowledged ? task : null;
     }
 }

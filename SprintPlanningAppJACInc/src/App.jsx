@@ -57,6 +57,7 @@ const App = () => {
             updatedTask,
           ];
         }
+        updateTaskInDatabase(task);
         setEditingTask(null);
         return newSprints;
       });
@@ -68,6 +69,7 @@ const App = () => {
           ...newSprints[sprintIndex].tasks[task.status],
           task,
         ];
+        addTaskToDatabase(task);
         return newSprints;
       });
     }
@@ -172,6 +174,43 @@ const App = () => {
       return newSprints;
     });
   };
+
+  /*Database Functions*/
+
+  const addTaskToDatabase = async (task) => {
+    try {
+      let response = await fetch("http://localhost:5000/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({ query: `mutation($sprint: String, $status: String, $description: String, $member: String, $cost: Int, $estimate: Int) 
+        { addTask(sprint: $sprint, status: $status, description: $description, member: $member, cost: $cost, estimate: $estimate) {sprint, status, description, member, cost, estimate}}`,
+        variables: {"sprint": task.sprint, "status": task.status, "description": task.description, "member": task.teamMember, "cost": task.cost, "estimate": task.estimate}})
+      });
+      console.log(response);
+    } catch (error){
+      console.log(error);
+    }
+  }
+
+  const updateTaskInDatabase = async (task) => {
+    try {
+      let response = await fetch("http://localhost:5000/graphql", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8"
+        },
+        body: JSON.stringify({ query: `mutation($sprint: String, $status: String, $description: String, $member: String, $cost: Int, $estimate: Int) 
+        { updateTask(sprint: $sprint, status: $status, description: $description, member: $member, cost: $cost, estimate: $estimate) {sprint, status, description, member, cost, estimate}}`,
+        variables: {"sprint": task.sprint, "status": task.status, "description": task.description, "member": task.teamMember, "cost": task.cost, "estimate": task.estimate}})
+      });
+    } catch(error)
+    {
+      console.log(error);
+    }
+  }
+  /*End database functions*/
 
   return (
     <div className="app">

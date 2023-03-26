@@ -29,6 +29,8 @@ const findOne = (db, coll, criteria) => db.collection(coll).findOne(criteria);
 const findAll = (db, coll, criteria, projection) =>
   db.collection(coll).find(criteria).project(projection).toArray();
 const getJSONFromWWWPromise = (url) => got(url).json();
+const updateOne = (db, coll, criteria, projection) =>
+ db.collection(coll).findOneAndUpdate(criteria, { $set: projection}, {rawResult: true} );
 const findUniqueValues = (db, coll, field) => db.collection(coll).distinct(field);
 
 export {
@@ -40,5 +42,6 @@ export {
     findOne,
     findAll,
     getJSONFromWWWPromise,
-    findUniqueValues
+    findUniqueValues,
+    updateOne
   };

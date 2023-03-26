@@ -137,6 +137,42 @@ const App = () => {
     alert(`Sprint Summary for ${sprintName}:\n${summary}`);
   };
 
+  const handleCompleteSprint = (currentSprintName) => {
+    setSprints((prevSprints) => {
+      const newSprints = [...prevSprints];
+      const currentSprintIndex = newSprints.findIndex(
+        (s) => s.name === currentSprintName
+      );
+      let nextSprintIndex = currentSprintIndex + 1;
+
+      // Create a new sprint if there is no next sprint.
+      if (nextSprintIndex >= newSprints.length) {
+        handleCreateSprint();
+        nextSprintIndex = newSprints.length; // Update nextSprintIndex after creating sprint.
+      }
+
+      const currentSprint = newSprints[currentSprintIndex];
+      const nextSprint = newSprints[nextSprintIndex];
+
+      // Move tasks that are not 'Done' to the next sprint.
+      Object.entries(currentSprint.tasks).forEach(([status, taskList]) => {
+        if (status !== "Done") {
+          nextSprint.tasks[status] = [...nextSprint.tasks[status], ...taskList];
+        }
+      });
+
+      // Remove tasks that are not 'Done' from old sprint.
+      newSprints[currentSprintIndex].tasks = {
+        ...currentSprint.tasks,
+        Todo: [],
+        InProgress: [],
+        UnderReview: [],
+      };
+
+      return newSprints;
+    });
+  };
+
   return (
     <div className="app">
       <h1>Task Tracker</h1>
@@ -178,6 +214,14 @@ const App = () => {
               >
                 Display Sprint Summary
               </button>
+              {sprint.name !== "Backlog" && (
+                <button
+                  onClick={() => handleCompleteSprint(sprint.name)}
+                  className="complete-sprint"
+                >
+                  Complete Sprint
+                </button>
+              )}
             </div>
           );
         })}

@@ -17,15 +17,22 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
   const [estimate, setEstimate] = useState(
     editingTask ? editingTask.estimate : 0
   );
+  const [subTasks, setsubTasks] = useState( editingTask ? editingTask.subTasks : [{ value: '' }]);
+  const [subTasksdetail, setsubTasksdetail] = useState("");
 
+  const addsubTasks = () => {
+    setsubTasks([...subTasks, { value: '' }]);
+  };
   useEffect(() => {
     if (editingTask) {
+      console.log(editingTask);
       setSprint(editingTask.sprint);
       setStatus(editingTask.status);
       setDescription(editingTask.description);
       setTeamMember(editingTask.teamMember);
       setCost(editingTask.cost);
       setEstimate(editingTask.estimate);
+      setsubTasks(editingTask.subTasks);
     } else {
       setSprint(sprints[0].name);
       setStatus("Todo");
@@ -33,6 +40,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       setTeamMember("");
       setCost(0);
       setEstimate(0);
+      setsubTasks([{ value: '' }]);
     }
   }, [editingTask, sprints]);
 
@@ -45,6 +53,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       teamMember,
       cost,
       estimate,
+      subTasks,
     });
     setSprint(sprints[0].name);
     setStatus("Todo");
@@ -52,6 +61,7 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
     setTeamMember("");
     setCost(0);
     setEstimate(0);
+    setsubTasks([{ value: '' }]);
   };
 
   return (
@@ -88,11 +98,15 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       </div>
       <div className="task-form__field">
         <label>Team Member:</label>
-        <input
-          type="text"
-          value={teamMember}
-          onChange={(e) => setTeamMember(e.target.value)}
-        />
+        <select value={teamMember} onChange={(e) => setTeamMember(e.target.value)}>
+          {sprints
+            .find((s) => s.name === sprint)
+            .teamMember.map((teammember) => (
+              <option key={`${teammember}`} value={teammember}>
+                {teammember}
+              </option>
+            ))}
+        </select>
       </div>
       <div className="task-form__field">
         <label>Relative Cost:</label>
@@ -109,6 +123,21 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
           value={estimate}
           onChange={(e) => setEstimate(parseInt(e.target.value))}
         />
+      </div>
+      <div className="task-form__field">
+        <label>Subtask:</label>
+        {subTasks.map((subtask, index) => (
+        <input
+          key={index}
+          value={subtask.value}
+          onChange={(e) => {
+            const newInputs = [...subTasks];
+            newInputs[index].value = e.target.value;
+            setsubTasks(newInputs);
+          }}
+        />
+      ))}
+        <button type="button" onClick={addsubTasks} >Add subtask</button>
       </div>
       <div className="task-form__actions">
         <button type="submit">

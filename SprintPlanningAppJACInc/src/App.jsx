@@ -4,10 +4,12 @@ import TaskList from "./components/TaskList";
 import "./App.css";
 
 const App = () => {
+
   const [sprints, setSprints] = useState([
     {
       name: "Backlog",
       columns: ["Todo", "InProgress", "UnderReview", "Done"],
+      teamMember: ["Jeesung", "Connor","Aaron",""],
       tasks: {
         Todo: [],
         InProgress: [],
@@ -18,6 +20,7 @@ const App = () => {
     {
       name: "Sprint 1",
       columns: ["Todo", "InProgress", "UnderReview", "Done"],
+      teamMember: ["Jeesung", "Connor","Aaron",""],
       tasks: {
         Todo: [],
         InProgress: [],
@@ -95,6 +98,7 @@ const App = () => {
     const newSprint = {
       name: `Sprint ${sprints.length}`,
       columns: ["Todo", "InProgress", "UnderReview", "Done"],
+      teamMember: ["Jeesung", "Connor","Aaron", ""],
       tasks: {
         Todo: [],
         InProgress: [],
@@ -135,6 +139,13 @@ const App = () => {
       .join("\n");
 
     alert(`Sprint Summary for ${sprintName}:\n${summary}`);
+  };
+
+  const showSubtask = (task) =>{
+    const summary = task.subTasks.map((sub) => {
+      return `${sub.value}`;
+    }).join("\n");
+    alert(`List of subtask for ${task.description}:\n${summary}`);
   };
 
   const handleCompleteSprint = (currentSprintName) => {
@@ -192,7 +203,6 @@ const App = () => {
                 <span>
                   {sprint.name} Relative Cost: {totalCost}
                 </span>
-
                 <span>
                   {sprint.name} Relative Estimate: {totalEstimate}
                 </span>
@@ -205,6 +215,7 @@ const App = () => {
                     tasks={sprint.tasks[column]}
                     onEdit={handleEdit}
                     onRemove={handleRemove}
+                    onSub={showSubtask}
                   />
                 ))}
               </div>

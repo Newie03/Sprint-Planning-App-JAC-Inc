@@ -1,6 +1,6 @@
 import React from "react";
 
-const TaskList = ({ title, tasks, onEdit, onRemove }) => (
+const TaskList = ({ title, tasks, onEdit, onRemove, onSub }) => (
   <div className="task-list">
     <h3>{title}</h3>
     <ul>
@@ -20,7 +20,9 @@ const TaskList = ({ title, tasks, onEdit, onRemove }) => (
           <div className="task-list__item-estimate">
             Relative Estimate: {task.estimate}
           </div>
+          <div className="task-list__item-cost">Subtasks: {task.subTasks.length}</div>
           <div className="task-list__item-actions">
+          <button onClick={() => onSub(task)}>Show Subtasks</button>
             <button onClick={() => onEdit(task)}>Edit</button>
             <button onClick={() => onRemove(task)}>Remove</button>
           </div>

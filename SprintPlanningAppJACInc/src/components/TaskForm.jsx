@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from "react";
 
-const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
+const TaskForm = ({
+  onSubmit,
+  editingTask,
+  onCancel,
+  sprints,
+  teamMembers,
+}) => {
   const [sprint, setSprint] = useState(
     editingTask ? editingTask.sprint : sprints[0].name
   );
@@ -17,12 +23,39 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
   const [estimate, setEstimate] = useState(
     editingTask ? editingTask.estimate : 0
   );
-  const [subTasks, setsubTasks] = useState( editingTask ? editingTask.subTasks : [{ value: '' }]);
-  const [subTasksdetail, setsubTasksdetail] = useState("");
+  const [priority, setPriority] = useState(
+    editingTask ? editingTask.estimate : 0
+  );
+  const [subTasks, setsubTasks] = useState(
+    editingTask
+      ? editingTask.subTasks
+      : [{ value: "", actualHours: 0, estimatedTime: 0 }]
+  );
 
-  const addsubTasks = () => {
-    setsubTasks([...subTasks, { value: '' }]);
+  const [subTasksAssignee, setSubTasksAssignee] = useState(
+    editingTask ? editingTask.subTasksAssignee : []
+  );
+
+  const assignSubtask = (index, assignee) => {
+    const newAssignee = [...subTasksAssignee];
+    newAssignee[index] = assignee;
+    setSubTasksAssignee(newAssignee);
   };
+
+  const addSubtask = () => {
+    setsubTasks([...subTasks, { value: "" }]);
+  };
+
+  const updateSubtask = (index, value, actualHours, estimatedTime) => {
+    const updatedSubTasks = [...subTasks];
+    updatedSubTasks[index] = { value, actualHours, estimatedTime };
+    setsubTasks(updatedSubTasks);
+  };
+
+  const removeSubtask = (index) => {
+    setsubTasks(subTasks.filter((_, i) => i !== index));
+  };
+
   useEffect(() => {
     if (editingTask) {
       console.log(editingTask);
@@ -32,7 +65,9 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       setTeamMember(editingTask.teamMember);
       setCost(editingTask.cost);
       setEstimate(editingTask.estimate);
+      setPriority(editingTask.priority);
       setsubTasks(editingTask.subTasks);
+      setSubTasksAssignee(editingTask.subTasksAssignee);
     } else {
       setSprint(sprints[0].name);
       setStatus("Todo");
@@ -40,7 +75,9 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       setTeamMember("");
       setCost(0);
       setEstimate(0);
-      setsubTasks([{ value: '' }]);
+      setPriority(0);
+      setsubTasks([{ value: "" }]);
+      setSubTasksAssignee([]);
     }
   }, [editingTask, sprints]);
 
@@ -53,7 +90,9 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       teamMember,
       cost,
       estimate,
+      priority,
       subTasks,
+      subTasksAssignee,
     });
     setSprint(sprints[0].name);
     setStatus("Todo");
@@ -61,7 +100,8 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
     setTeamMember("");
     setCost(0);
     setEstimate(0);
-    setsubTasks([{ value: '' }]);
+    setPriority(0);
+    setsubTasks([{ value: "", actualHours: 0, estimatedTime: 0 }]);
   };
 
   return (
@@ -98,7 +138,10 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
       </div>
       <div className="task-form__field">
         <label>Team Member:</label>
-        <select value={teamMember} onChange={(e) => setTeamMember(e.target.value)}>
+        <select
+          value={teamMember}
+          onChange={(e) => setTeamMember(e.target.value)}
+        >
           {sprints
             .find((s) => s.name === sprint)
             .teamMember.map((teammember) => (
@@ -125,30 +168,84 @@ const TaskForm = ({ onSubmit, editingTask, onCancel, sprints }) => {
         />
       </div>
       <div className="task-form__field">
-        <label>Subtask:</label>
-        {subTasks.map((subtask, index) => (
+        <label>Priority:</label>
         <input
-          key={index}
-          value={subtask.value}
-          onChange={(e) => {
-            const newInputs = [...subTasks];
-            newInputs[index].value = e.target.value;
-            setsubTasks(newInputs);
-          }}
+          type="number"
+          value={priority}
+          onChange={(e) => setPriority(parseInt(e.target.value))}
         />
-      ))}
-        <button type="button" onClick={addsubTasks} >Add subtask</button>
       </div>
-      <div className="task-form__actions">
-        <button type="submit">
-          {editingTask ? "Update Task" : "Create Task"}
-        </button>
-        {editingTask && (
-          <button type="button" onClick={onCancel}>
-            Cancel
-          </button>
-        )}
+      <div className="task-form__field">
+        <label>Subtask:</label>
+        {subTasks.map((subTask, index) => (
+          <div key={index}>
+            <input
+              type="text"
+              placeholder={`Subtask #${index + 1}`}
+              value={subTask.value}
+              onChange={(e) =>
+                updateSubtask(
+                  index,
+                  e.target.value,
+                  subTask.actualHours,
+                  subTask.estimatedTime
+                )
+              }
+            />
+            <input
+              type="number"
+              placeholder="Actual Hours Worked"
+              value={subTask.actualHours}
+              onChange={(e) =>
+                updateSubtask(
+                  index,
+                  subTask.value,
+                  parseInt(e.target.value),
+                  subTask.estimatedTime
+                )
+              }
+            />
+            <input
+              type="number"
+              placeholder="Estimated Time to Complete"
+              value={subTask.estimatedTime}
+              onChange={(e) =>
+                updateSubtask(
+                  index,
+                  subTask.value,
+                  subTask.actualHours,
+                  parseInt(e.target.value)
+                )
+              }
+            />
+            <select
+              value={subTasksAssignee[index] || ""}
+              onChange={(e) => assignSubtask(index, e.target.value)}
+            >
+              <option value="" disabled>
+                Assign to team member
+              </option>
+              {teamMembers.map((member, i) => (
+                <option key={i} value={member}>
+                  {member}
+                </option>
+              ))}
+            </select>
+            <button type="button" onClick={() => removeSubtask(index)}>
+              Remove
+            </button>
+          </div>
+        ))}
       </div>
+
+      <button type="button" onClick={addSubtask}>
+        Add subtask
+      </button>
+
+      <button type="submit">Submit</button>
+      <button type="button" onClick={onCancel}>
+        Cancel
+      </button>
     </form>
   );
 };

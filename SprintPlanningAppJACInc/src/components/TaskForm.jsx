@@ -23,6 +23,10 @@ const TaskForm = ({
   const [estimate, setEstimate] = useState(
     editingTask ? editingTask.estimate : 0
   );
+  const [hours, setHours] = useState(editingTask ? editingTask.estimate : 0);
+  const [estimateComplete, setEstimateComplete] = useState(
+    editingTask ? editingTask.estimate : 0
+  );
   const [priority, setPriority] = useState(
     editingTask ? editingTask.estimate : 0
   );
@@ -37,18 +41,24 @@ const TaskForm = ({
   );
 
   const assignSubtask = (index, assignee) => {
-    const newAssignee = [...subTasksAssignee];
-    newAssignee[index] = assignee;
-    setSubTasksAssignee(newAssignee);
+    const updatedSubTasks = [...subTasks];
+    updatedSubTasks[index] = { ...updatedSubTasks[index], assignee };
+    setsubTasks(updatedSubTasks);
   };
 
   const addSubtask = () => {
     setsubTasks([...subTasks, { value: "" }]);
   };
 
-  const updateSubtask = (index, value, actualHours, estimatedTime) => {
+  const updateSubtask = (
+    index,
+    value,
+    actualHours,
+    estimatedTime,
+    assignee
+  ) => {
     const updatedSubTasks = [...subTasks];
-    updatedSubTasks[index] = { value, actualHours, estimatedTime };
+    updatedSubTasks[index] = { value, actualHours, estimatedTime, assignee };
     setsubTasks(updatedSubTasks);
   };
 
@@ -65,7 +75,9 @@ const TaskForm = ({
       setTeamMember(editingTask.teamMember);
       setCost(editingTask.cost);
       setEstimate(editingTask.estimate);
+      setHours(editingTask.hours);
       setPriority(editingTask.priority);
+      setEstimateComplete(editingTask.estimateComplete);
       setsubTasks(editingTask.subTasks);
       setSubTasksAssignee(editingTask.subTasksAssignee);
     } else {
@@ -75,7 +87,9 @@ const TaskForm = ({
       setTeamMember("");
       setCost(0);
       setEstimate(0);
+      setHours(0);
       setPriority(0);
+      setEstimateComplete(0);
       setsubTasks([{ value: "" }]);
       setSubTasksAssignee([]);
     }
@@ -90,9 +104,10 @@ const TaskForm = ({
       teamMember,
       cost,
       estimate,
+      hours,
       priority,
+      estimateComplete,
       subTasks,
-      subTasksAssignee,
     });
     setSprint(sprints[0].name);
     setStatus("Todo");
@@ -100,7 +115,9 @@ const TaskForm = ({
     setTeamMember("");
     setCost(0);
     setEstimate(0);
+    setHours(0);
     setPriority(0);
+    setEstimateComplete(0);
     setsubTasks([{ value: "", actualHours: 0, estimatedTime: 0 }]);
   };
 
@@ -152,6 +169,14 @@ const TaskForm = ({
         </select>
       </div>
       <div className="task-form__field">
+        <label>Priority:</label>
+        <input
+          type="number"
+          value={priority}
+          onChange={(e) => setPriority(parseInt(e.target.value))}
+        />
+      </div>
+      <div className="task-form__field">
         <label>Relative Cost:</label>
         <input
           type="number"
@@ -168,11 +193,19 @@ const TaskForm = ({
         />
       </div>
       <div className="task-form__field">
-        <label>Priority:</label>
+        <label>Actual Hours:</label>
         <input
           type="number"
-          value={priority}
-          onChange={(e) => setPriority(parseInt(e.target.value))}
+          value={hours}
+          onChange={(e) => setHours(parseInt(e.target.value))}
+        />
+      </div>
+      <div className="task-form__field">
+        <label>Estimate to Complete:</label>
+        <input
+          type="number"
+          value={estimateComplete}
+          onChange={(e) => setEstimateComplete(parseInt(e.target.value))}
         />
       </div>
       <div className="task-form__field">
@@ -219,8 +252,16 @@ const TaskForm = ({
               }
             />
             <select
-              value={subTasksAssignee[index] || ""}
-              onChange={(e) => assignSubtask(index, e.target.value)}
+              value={subTask.assignee || ""}
+              onChange={(e) =>
+                updateSubtask(
+                  index,
+                  subTask.value,
+                  subTask.actualHours,
+                  subTask.estimatedTime,
+                  e.target.value
+                )
+              }
             >
               <option value="" disabled>
                 Assign to team member

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import TaskForm from "./components/TaskForm";
 import TaskList from "./components/TaskList";
 import TeamMembers from "./components/TeamMember";
+import { jsPDF } from "jspdf";
+import autoTable from "jspdf-autotable";
 import "./App.css";
 
 const App = () => {
@@ -15,6 +17,7 @@ const App = () => {
     "A simple sprint planning tool."
   );
   const [teamMembers, setTeamMembers] = useState([
+    " ",
     "Jeesung Shin",
     "Connor McPhail",
     "Aaron Newham",
@@ -120,7 +123,7 @@ const App = () => {
     const newSprint = {
       name: `Sprint ${sprints.length}`,
       columns: ["Todo", "InProgress", "UnderReview", "Done"],
-      teamMember: ["Jeesung", "Connor", "Aaron", ""],
+      teamMember: ["Jeesung", "Connor", "Aaron"],
       tasks: {
         Todo: [],
         InProgress: [],
@@ -145,24 +148,6 @@ const App = () => {
     return { totalCost, totalEstimate };
   };
 
-  const handleDisplaySprintSummary = (sprintName) => {
-    const sprint = sprints.find((s) => s.name === sprintName);
-    const summary = sprint.columns
-      .map((column) => {
-        const tasks = sprint.tasks[column];
-        const totalTimeSpent = tasks.reduce((acc, task) => acc + task.cost, 0);
-        const totalEstimate = tasks.reduce(
-          (acc, task) => acc + task.estimate,
-          0
-        );
-        const taskCount = tasks.length;
-        return `${column}: ${taskCount} tasks, ${totalTimeSpent} hours spent, ${totalEstimate} hours estimated`;
-      })
-      .join("\n");
-
-    alert(`Sprint Summary for ${sprintName}:\n${summary}`);
-  };
-
   const showSubtask = (task) => {
     const summary = task.subTasks
       .map((sub) => {
@@ -183,7 +168,7 @@ const App = () => {
       // Create a new sprint if there is no next sprint.
       if (nextSprintIndex >= newSprints.length) {
         handleCreateSprint();
-        nextSprintIndex = newSprints.length; // Update nextSprintIndex after creating sprint.
+        nextSprintIndex = newSprints.length;
       }
 
       const currentSprint = newSprints[currentSprintIndex];
@@ -193,7 +178,7 @@ const App = () => {
       Object.entries(currentSprint.tasks).forEach(([status, taskList]) => {
         if (status !== "Done") {
           taskList.forEach((task) => {
-            // Remove any subtasks with an estimateTime of 0.
+            // Remove any subtasks with an estimateTime of 0 <- Doesn't work?
             task.subTasks = task.subTasks.filter(
               (subTask) => subTask.estimatedTime !== 0
             );
@@ -204,7 +189,6 @@ const App = () => {
         }
       });
 
-      // Remove tasks that are not 'Done' from old sprint.
       newSprints[currentSprintIndex].tasks = {
         ...currentSprint.tasks,
         Todo: [],
@@ -214,6 +198,180 @@ const App = () => {
 
       return newSprints;
     });
+  };
+
+  const handleGenerateSprintSummary = (sprintName) => {
+    const sprint = sprints.find((s) => s.name === sprintName);
+    const sprintData = sprint.columns.map((column) => {
+      const tasks = sprint.tasks[column];
+      return { column, tasks };
+    });
+
+    generateSprintSummaryPdf(sprintName, sprintData);
+  };
+
+  const generateSprintSummaryPdf = (sprintName, sprintData) => {
+    const doc = new jsPDF();
+    const columns = [
+      "Priority",
+      "Task",
+      "Team Member",
+      "Subtasks",
+      "Relative Cost",
+      "Relative Estimate",
+    ];
+    const rows = sprintData.flatMap((columnData) => {
+      const { column, tasks } = columnData;
+      return tasks.map((task) => {
+        const subtasks = task.subTasks
+          .map(
+            (sub) =>
+              `${sub.value} (Assigned to: ${sub.assignee}, Actual Hours: ${sub.actualHours}, Estimated Time: ${sub.estimatedTime})`
+          )
+          .join("\n");
+
+        return [
+          task.priority,
+          task.description,
+          task.teamMember,
+          subtasks,
+          task.cost,
+          task.estimate,
+        ];
+      });
+    });
+
+    // Calculations for  Total: row
+    const totalActualHours = sprintData
+      .flatMap((columnData) => columnData.tasks)
+      .reduce(
+        (total, task) =>
+          total +
+          task.subTasks.reduce(
+            (subTotal, sub) => subTotal + sub.actualHours,
+            0
+          ),
+        0
+      );
+
+    // Total: row
+    rows.push(["Total:", "", "", "", "", totalActualHours.toFixed(2)]);
+
+    doc.setFontSize(18);
+    doc.text(`Team Summary for ${sprintName}`, 14, 20);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 30,
+    });
+
+    doc.save(`${sprintName}_team_summary.pdf`);
+  };
+
+  const handleGenerateSprintTaskSummary = (sprintName) => {
+    const sprint = sprints.find((s) => s.name === sprintName);
+    const sprintData = sprint.columns.map((column) => {
+      const tasks = sprint.tasks[column];
+      return { column, tasks };
+    });
+
+    generateSprintTaskSummaryPdf(sprintName, sprintData);
+  };
+
+  const generateSprintTaskSummaryPdf = (sprintName, sprintData) => {
+    const doc = new jsPDF();
+    const columns = [
+      "Task",
+      "Assigned Team Member",
+      "Percent Complete",
+      "Original Hours Estimate",
+      "Actual Hours Worked",
+      "Re-Estimate to Complete",
+    ];
+
+    const rows = [];
+
+    sprintData.forEach((columnData) => {
+      const { column, tasks } = columnData;
+      tasks.forEach((task) => {
+        const percentComplete = `${(
+          (task.hours / (task.hours + task.estimateComplete)) *
+          100
+        ).toFixed(2)}%`;
+
+        rows.push([
+          task.description,
+          task.teamMember,
+          percentComplete,
+          task.estimate,
+          task.hours,
+          task.estimateComplete,
+        ]);
+
+        task.subTasks.forEach((sub) => {
+          rows.push([
+            task.description + ": " + sub.value,
+            sub.assignee,
+            "",
+            sub.estimatedTime,
+            sub.actualHours,
+            sub.estimatedTime,
+          ]);
+        });
+      });
+    });
+
+    // Calculations for  Total: row
+    const summaryData = sprintData
+      .flatMap((columnData) => columnData.tasks)
+      .reduce(
+        (acc, task) => {
+          acc.originalHours += task.estimate;
+          acc.actualHours += task.hours;
+          acc.reEstimate += task.estimateComplete;
+          acc.percentCompleteSum +=
+            (task.hours / (task.hours + task.estimate)) * 100;
+          acc.count += 1;
+          return acc;
+        },
+        {
+          originalHours: 0,
+          actualHours: 0,
+          reEstimate: 0,
+          percentCompleteSum: 0,
+          count: 0,
+        }
+      );
+
+    const averagePercentComplete = (
+      summaryData.percentCompleteSum / summaryData.count
+    ).toFixed(2);
+
+    // Total: row
+    rows.push([
+      "Total:",
+      "",
+      averagePercentComplete + "%",
+      summaryData.originalHours.toFixed(2),
+      summaryData.actualHours.toFixed(2),
+      summaryData.reEstimate.toFixed(2),
+    ]);
+
+    doc.setFontSize(18);
+    doc.text(`Task Summary for ${sprintName}`, 14, 20);
+    doc.setFontSize(11);
+    doc.setTextColor(100);
+
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 30,
+    });
+
+    doc.save(`${sprintName}_task_summary.pdf`);
   };
 
   return (
@@ -309,12 +467,22 @@ const App = () => {
                   />
                 ))}
               </div>
-              <button
-                onClick={() => handleDisplaySprintSummary(sprint.name)}
-                className="display-summary"
-              >
-                Display Sprint Summary
-              </button>
+              {sprint.name !== "Backlog" && (
+                <button
+                  onClick={() => handleGenerateSprintSummary(sprint.name)}
+                  className="generate-summary"
+                >
+                  Generate Team Member Work Summary
+                </button>
+              )}
+              {sprint.name !== "Backlog" && (
+                <button
+                  onClick={() => handleGenerateSprintTaskSummary(sprint.name)}
+                  className="generate-sprint-summary"
+                >
+                  Generate Sprint Summary Report
+                </button>
+              )}
               {sprint.name !== "Backlog" && (
                 <button
                   onClick={() => handleCompleteSprint(sprint.name)}

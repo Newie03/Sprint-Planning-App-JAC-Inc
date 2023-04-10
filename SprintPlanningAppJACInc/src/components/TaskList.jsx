@@ -16,12 +16,18 @@ const TaskList = ({ title, tasks, onEdit, onRemove, onSub }) => (
           <div className="task-list__item-team-member">
             Team Member: {task.teamMember}
           </div>
+          <div className="task-list__item-priority">
+            Priority: {task.priority}
+          </div>
           <div className="task-list__item-cost">Relative Cost: {task.cost}</div>
           <div className="task-list__item-estimate">
             Relative Estimate: {task.estimate}
           </div>
-          <div className="task-list__item-priority">
-            Priority: {task.priority}
+          <div className="task-list__item-hours">
+            Actual Hours: {task.hours}
+          </div>
+          <div className="task-list__item-estimate-complete">
+            Estimate to Complete: {task.estimateComplete}
           </div>
           <div className="task-list__item-subtasks">
             Subtasks:
@@ -38,7 +44,7 @@ const TaskList = ({ title, tasks, onEdit, onRemove, onSub }) => (
                     Estimated Time to Complete: {subTask.estimatedTime}
                   </div>
                   <div className="task-list__subtask-assignee">
-                    Assignee: {task.subTasksAssignee[index] || "Unassigned"}
+                    Assignee: {subTask.assignee || "Unassigned"}
                   </div>
                 </li>
               ))}
